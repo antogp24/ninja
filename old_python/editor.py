@@ -25,7 +25,7 @@ camera_pos = [0, 0]
 scroll = [0, 0]
 scroll_lag = 10
 camera_speed = [0, 0]
-CAMERA_SPEED = 3
+CAMERA_SPEED = 16/RENDER_SCALE
 movement = [False, False, False, False]
 
 tilemap = Tilemap(tile_size=16)
@@ -33,6 +33,11 @@ tile_list = list(images)
 tile_group = 0 
 tile_variant = 0
 on_grid = True
+
+try:
+    tilemap.load_from_file('map.json')
+except FileNotFoundError:
+    pass
 
 left_clicking = False
 middle_clicking = False
@@ -160,7 +165,7 @@ while True:
                 movement[1] = True
             if event.key == pygame.K_UP or event.key == pygame.K_w:
                 movement[2] = True
-            if event.key == pygame.K_DOWN or event.key == pygame.K_s:
+            if event.key == pygame.K_DOWN or event.key == pygame.K_s and not pressing_ctrl:
                 movement[3] = True
             if event.key == pygame.K_LSHIFT:
                 pressing_shift = True
@@ -179,6 +184,12 @@ while True:
                 elif not on_grid:
                     tile_group = 2
                 tile_variant = 0
+            if event.key == pygame.K_t:
+                tilemap.autotile()
+            if event.key == pygame.K_0:
+                for i in range(len(scroll)):
+                    scroll[i] = 0
+                    camera_pos[i] = 0
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_a:
