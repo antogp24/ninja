@@ -10,8 +10,9 @@ GAME_SCREEN_WIDTH  :: 640
 GAME_SCREEN_HEIGHT :: 480
 RENDER_SCALE :: 2
 
-FolderName  :: distinct string
 ImageFolder :: distinct [dynamic]rl.Texture2D
+Images      :: distinct map[string]ImageFolder
+Animations  :: distinct map[string]Animation
 
 main :: proc() {
     rl.SetConfigFlags({.WINDOW_RESIZABLE, .VSYNC_HINT})
@@ -22,14 +23,16 @@ main :: proc() {
     rl.SetWindowMinSize(GAME_SCREEN_WIDTH/2, GAME_SCREEN_HEIGHT/2)
     rl.SetTargetFPS(FPS)
 
-    images := map[FolderName]ImageFolder {
+    // images[path][variant]
+    images := Images {
         "grass" = load_images("tiles/grass"),
         "stone" = load_images("tiles/stone"),
         "clouds" = load_images("clouds"),
         "decor" = load_images("tiles/decor"),
         "large_decor" = load_images("tiles/large_decor"),
     }
-    animations := map[FolderName]Animation {
+    // animations[path]
+    animations := Animations {
         "entities/player/idle" = animation_load("entities/player/idle", image_duration=6, loop=true),
         "entities/player/run" = animation_load("entities/player/run", image_duration=4, loop=true),
         "entities/player/jump" = animation_load("entities/player/jump"),
@@ -52,11 +55,11 @@ main :: proc() {
 
         mouse := rl.GetMousePosition()
         virtual_mouse := rl.Vector2{
-            ( mouse.x - leftover_width  ) / scale,
-            ( mouse.y - leftover_height ) / scale,
+            ( mouse.x - leftover_width  ) / (scale*RENDER_SCALE),
+            ( mouse.y - leftover_height ) / (scale*RENDER_SCALE),
         }
-        virtual_mouse.x = math.clamp(virtual_mouse.x, 0, GAME_SCREEN_WIDTH)
-        virtual_mouse.y = math.clamp(virtual_mouse.y, 0, GAME_SCREEN_HEIGHT)
+        virtual_mouse.x = math.clamp(virtual_mouse.x, 0, GAME_SCREEN_WIDTH/RENDER_SCALE)
+        virtual_mouse.y = math.clamp(virtual_mouse.y, 0, GAME_SCREEN_HEIGHT/RENDER_SCALE)
 
         timer += dt 
         if timer > 1 do timer = 0
@@ -68,10 +71,10 @@ main :: proc() {
             rl.DrawTexture(background_image, 0, 0, rl.WHITE)
             // now 
             rl.DrawTexture(images["grass"][variant],
-                          cast(i32)(virtual_mouse.x/RENDER_SCALE - cast(f32)images["grass"][variant].width/2),
-                          cast(i32)(virtual_mouse.y/RENDER_SCALE - cast(f32)images["grass"][variant].height/2),
+                          cast(i32)(virtual_mouse.x - cast(f32)images["grass"][variant].width/2),
+                          cast(i32)(virtual_mouse.y - cast(f32)images["grass"][variant].height/2),
                           rl.WHITE)
-            rl.DrawCircle(cast(i32)(virtual_mouse.x/RENDER_SCALE), cast(i32)(virtual_mouse.y/RENDER_SCALE), 1, rl.RED)
+            rl.DrawCircle(cast(i32)(virtual_mouse.x), cast(i32)(virtual_mouse.y), 1, rl.RED)
         }
         rl.EndTextureMode()
 

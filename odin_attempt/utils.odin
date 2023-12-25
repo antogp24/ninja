@@ -56,6 +56,6 @@ animation_update :: proc(using animation : ^Animation) {
     }
 }
 
-animation_get_image :: proc(using animation : ^Animation) -> rl.Texture2D {
-    return images[cast(int)(frame / image_duration)]
+animation_get_image :: proc(using animation : ^Animation) -> ^rl.Texture2D {
+    return &images[cast(int)(frame / image_duration)]
 }
